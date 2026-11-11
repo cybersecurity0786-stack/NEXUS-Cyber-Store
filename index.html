@@ -743,68 +743,74 @@ startWebsite();
 </body>
 </html>
 <div class="call-section">
-  <h3>NEED HELP? CONTACT NEXUS</h3>
+  <h3>🌐 NEXUS CUSTOMER SUPPORT</h3>
+  <p>Any issue? Contact our support team.</p>
 
-  <a href="tel:+923281393084,+916366225421" class="call-btn">
-    📞 CALL NOW
-  </a>
+  <div class="support-card">
+    <h4>🇵🇰 Pakistan Support</h4>
+    <p>+92 328 1393084</p>
+    <a href="tel:+923281393084" class="call-btn">📞 CALL NOW</a>
+    <a href="https://wa.me/923281393084" class="whatsapp-btn">🟢 WHATSAPP</a>
+  </div>
 
-  <p>اگر لنک اوپن نہ ہو تو اس نمبر پر کال کریں:</p>
-
-  <a href="tel:+923281393084,+916366225421" class="phone-number">
-    +92 300 1234567
-  </a>
+  <div class="support-card">
+    <h4>🇮🇳 India Support</h4>
+    <p>+91 63662 25421</p>
+    <a href="tel:+916366225421" class="call-btn">📞 CALL NOW</a>
+    <a href="https://wa.me/916366225421" class="whatsapp-btn">🟢 WHATSAPP</a>
+  </div>
 
   <p class="help-text">
-    اگر آپ کو ویب سائٹ استعمال کرنے میں کوئی مسئلہ،
-    لنک اوپن کرنے میں دشواری یا کوئی اور Issue پیش آئے،
-    تو براہِ کرم ہم سے اس نمبر پر رابطہ کریں۔
+    اگر ویب سائٹ کا لنک اوپن نہ ہو، کوئی لنک کام نہ کرے
+    یا آپ کو کوئی بھی مسئلہ پیش آئے تو پاکستان یا انڈیا
+    سپورٹ ٹیم سے کال یا WhatsApp پر رابطہ کریں۔
   </p>
-
-  <a href="tel:+92328139308,+916366225421" class="support-btn">
-    CONTACT SUPPORT
-  </a>
 </div>
 
 <style>
 .call-section{
   text-align:center;
   padding:25px 15px;
-  margin:20px auto;
   max-width:600px;
+  margin:20px auto;
   background:#06140f;
   border:1px solid #00ff9d;
   border-radius:12px;
   color:#b8d9ca;
 }
-.call-section h3{
-  color:#00ff9d;
+.call-section h3{color:#00ff9d}
+.support-card{
+  background:#0c201a;
+  border:1px solid #12513c;
+  border-radius:10px;
+  padding:20px;
+  margin:15px 0;
 }
-.call-btn,.support-btn{
+.support-card h4{color:#00ff9d}
+.call-btn,.whatsapp-btn{
   display:inline-block;
-  padding:13px 25px;
-  margin:10px;
+  padding:12px 17px;
+  margin:6px;
+  border-radius:6px;
+  text-decoration:none;
+  font-weight:bold;
+}
+.call-btn{
   background:#063c2c;
   color:#00ff9d;
   border:1px solid #00ff9d;
-  border-radius:7px;
-  text-decoration:none;
-  font-weight:bold;
 }
-.phone-number{
-  display:block;
-  color:#00ff9d;
-  font-size:20px;
-  text-decoration:none;
-  font-weight:bold;
+.whatsapp-btn{
+  background:#087c42;
+  color:white;
+  border:1px solid #00ff9d;
 }
 .help-text{
   line-height:1.8;
   font-size:14px;
-  color:#b8d9ca;
+  margin-top:20px;
 }
-.call-btn:hover,.support-btn:hover{
-  background:#00ff9d;
-  color:#00150d;
+.call-btn:hover,.whatsapp-btn:hover{
+  opacity:.8;
 }
 </style>
