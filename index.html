@@ -7,17 +7,17 @@
 <title>NEXUS | Cyber Store</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#030807;color:#eafff5;font-family:Arial,sans-serif}
-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:-2}
+body{margin:0;background:#030807;color:#eafff5;font-family:Arial}
+canvas{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none}
 body:before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,#073b2c88,transparent 65%);z-index:-1;pointer-events:none}
-header{height:75px;display:flex;align-items:center;justify-content:space-between;padding:0 7%;border-bottom:1px solid #075c43;background:#030807dd;position:sticky;top:0;z-index:5;backdrop-filter:blur(15px)}
-.logo{font-size:25px;letter-spacing:5px;color:#00ff9d;font-weight:bold;text-shadow:0 0 20px #00ff9d}
-nav{display:flex;gap:22px}
+header{height:75px;display:flex;align-items:center;justify-content:center;padding:0 7%;border-bottom:1px solid #075c43;background:#030807dd;position:sticky;top:0;z-index:5;backdrop-filter:blur(15px)}
+.logo{position:absolute;left:7%;font-size:25px;letter-spacing:5px;color:#00ff9d;font-weight:bold;text-shadow:0 0 20px #00ff9d}
+nav{display:flex;gap:30px}
 a{color:#b8d9ca;text-decoration:none}
 a:hover{color:#00ff9d}
 button{cursor:pointer;background:#063c2c;color:#00ff9d;border:1px solid #00a76b;padding:12px 19px;border-radius:5px}
 button:hover{background:#00a76b;color:#00150d;box-shadow:0 0 20px #00ff9d77}
-.hero{text-align:center;min-height:570px;padding:100px 20px 65px;position:relative;overflow:hidden}
+.hero{text-align:center;min-height:570px;padding:100px 20px 65px}
 .hero h1{font-size:clamp(45px,8vw,90px);margin:25px 0;color:#00ff9d;text-shadow:0 0 35px #00ff9d66}
 .hero p{color:#9ab9ac;font-size:17px;max-width:650px;margin:20px auto 30px;line-height:1.8}
 .tag{color:#00ff9d;border:1px solid #087c58;padding:9px 17px;border-radius:30px;font-size:12px;letter-spacing:3px}
@@ -44,34 +44,26 @@ footer{text-align:center;padding:35px;border-top:1px solid #164431;color:#739385
 .modalbox{width:min(440px,100%);background:#091712;border:1px solid #00ff9d;padding:25px;border-radius:12px;max-height:90vh;overflow:auto}
 .modal input,.modal select{width:100%;padding:12px;margin:8px 0;background:#06100d;color:white;border:1px solid #245443;border-radius:5px}
 .close{float:right}
-@media(max-width:600px){nav{gap:10px;font-size:12px}header{padding:0 12px}.hero{padding-top:65px}}
+@media(max-width:600px){header{height:auto;min-height:95px;flex-direction:column;gap:15px;padding:12px}.logo{position:static}nav{gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px}.hero{padding-top:65px}}
 </style>
 </head>
 <body>
-
 <canvas id="matrix"></canvas>
-
 <header>
 <div class="logo">NEXUS</div>
 <nav>
-<a href="#home">HOME</a>
-<a href="#free">FREE</a>
-<a href="#premium">PREMIUM</a>
-<a href="#about">ABOUT</a>
+<a href="#home">HOME</a><a href="#free">FREE</a><a href="#premium">PREMIUM</a><a href="#about">ABOUT</a>
 </nav>
 </header>
-
 <section class="hero" id="home">
 <span class="tag">NEXT GENERATION CYBER STORE</span>
 <div class="globe"></div>
-<h1>NEXUS CYBER</h1>
-<p>Explore premium digital products, cybersecurity resources and next-generation technology tools.</p>
+<h1 id="headline">NEXUS CYBER</h1>
+<p id="announcement">Explore premium digital products, cybersecurity resources and next-generation technology tools.</p>
 <a href="#premium"><button>EXPLORE PRODUCTS →</button></a>
 </section>
-
 <section class="section">
-<h2>WHY NEXUS?</h2>
-<p class="sub">A new digital experience</p>
+<h2>WHY NEXUS?</h2><p class="sub">A new digital experience</p>
 <div class="features">
 <div class="feature"><h3>◈ DIGITAL</h3><p>Digital Products</p></div>
 <div class="feature"><h3>◉ SECURE</h3><p>Secure Checkout Design</p></div>
@@ -79,24 +71,15 @@ footer{text-align:center;padding:35px;border-top:1px solid #164431;color:#739385
 <div class="feature"><h3>⚡ INSTANT</h3><p>Digital Delivery Links</p></div>
 </div>
 </section>
-
 <section class="section" id="free">
-<h2>FREE PRODUCTS</h2>
-<p class="sub">Explore our free collection</p>
-<div class="grid" id="freeProducts"></div>
+<h2>FREE PRODUCTS</h2><p class="sub">Explore our free collection</p><div class="grid" id="freeProducts"></div>
 </section>
-
 <section class="section" id="premium">
-<h2>PREMIUM PRODUCTS</h2>
-<p class="sub">Explore premium digital products</p>
-<div class="grid" id="paidProducts"></div>
+<h2>PREMIUM PRODUCTS</h2><p class="sub">Explore premium digital products</p><div class="grid" id="paidProducts"></div>
 </section>
-
 <section class="section" id="about">
-<h2>ABOUT NEXUS</h2>
-<p class="sub">Technology • Innovation • Digital Products</p>
+<h2>ABOUT NEXUS</h2><p class="sub">Technology • Innovation • Digital Products</p>
 </section>
-
 <div class="modal" id="checkout">
 <div class="modalbox">
 <button class="close" onclick="closeCheckout()">CLOSE</button>
@@ -104,140 +87,87 @@ footer{text-align:center;padding:35px;border-top:1px solid #164431;color:#739385
 <p id="selectedProduct"></p>
 <input id="customer" placeholder="Your Name">
 <input id="email" type="email" placeholder="Your Email">
-<select id="payment">
-<option>JazzCash</option>
-<option>Easypaisa</option>
-<option>Bank Transfer</option>
-<option>India UPI</option>
-</select>
+<input id="txn" placeholder="Payment Transaction ID">
+<select id="payment"><option>JazzCash</option><option>Easypaisa</option><option>Raast</option><option>Bank Transfer</option><option>UPI</option></select>
 <div id="paymentDetails"></div>
 <label>Payment Screenshot</label>
 <input type="file" id="proof" accept="image/*">
 <button onclick="placeOrder()">SUBMIT ORDER</button>
-<p style="color:#789b8b;font-size:11px">Demo checkout only. Payment must be independently verified.</p>
+<p style="color:#789b8b;font-size:11px">Payment remains pending until admin verification.</p>
 </div>
 </div>
-
-<footer>
-<div class="logo">NEXUS</div>
-<p>CYBER CONTROL CENTER</p>
-<p>© 2026 NEXUS. All Rights Reserved.</p>
-</footer>
-
+<footer><div class="logo" style="position:static">NEXUS</div><p>CYBER CONTROL CENTER</p><p>© 2026 NEXUS. All Rights Reserved.</p></footer>
 <script>
-// LIVE MATRIX BACKGROUND
-const canvas=document.getElementById('matrix');
-const ctx=canvas.getContext('2d');
+// Matrix animation
+const canvas=document.getElementById('matrix'),ctx=canvas.getContext('2d');
 let drops=[];
-function resize(){
- canvas.width=innerWidth;canvas.height=innerHeight;
- drops=Array(Math.ceil(canvas.width/17)).fill(1);
-}
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;drops=Array(Math.ceil(canvas.width/17)).fill(1)}
 window.addEventListener('resize',resize);resize();
 function draw(){
- ctx.fillStyle='rgba(3,8,7,.12)';
- ctx.fillRect(0,0,canvas.width,canvas.height);
- ctx.fillStyle='#00ff9d';
- ctx.font='14px monospace';
- drops.forEach((y,i)=>{
-  ctx.fillText(Math.random()>.5?'1':'0',i*17,y*17);
-  if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;
-  drops[i]++;
- });
+ ctx.fillStyle='rgba(3,8,7,.12)';ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle='#00ff9d';ctx.font='14px monospace';
+ drops.forEach((y,i)=>{ctx.fillText(Math.random()>.5?'1':'0',i*17,y*17);if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;drops[i]++});
  requestAnimationFrame(draw);
-}
-draw();
+}draw();
 
-// SAME STORAGE KEYS AS EXISTING CONTROL PANEL
-const get=(k,d)=>{try{return JSON.parse(localStorage.getItem('nx_'+k))??d}catch{return d}};
-let products=get('products',[]);
-let orders=get('orders',[]);
-let methods=get('methods',{});
-let selected=null;
+const KEY='nexus_control_v1';
+const blank=()=>({products:[],orders:[],payments:[],methods:{},site:{},visits:0});
+function readDB(){try{return {...blank(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return blank()}}
+let db=readDB(),products=db.products||[],selected=null;
 
-function esc(v){
- return String(v??'').replace(/[&<>"']/g,c=>({
- '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
- }[c]));
-}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
 function render(){
- products=get('products',[]);
- const make=p=>`
- <article class="product">
- <span class="type">${esc(p.type).toUpperCase()}</span>
- <h3>${esc(p.name)}</h3>
- <p>Explore this digital product from NEXUS.</p>
- <div class="price">${Number(p.price)===0?'FREE':esc(p.price)+' '+esc(p.currency)}</div>
- ${p.type==='Free'
- ?`<button onclick="download('${p.id}')">DOWNLOAD</button>`
- :`<button onclick="checkout('${p.id}')">BUY NOW</button>`}
- </article>`;
- const free=products.filter(p=>p.type==='Free');
- const paid=products.filter(p=>p.type!=='Free');
- document.getElementById('freeProducts').innerHTML=
- free.map(make).join('')||'<div class="empty">No free products available.</div>';
- document.getElementById('paidProducts').innerHTML=
- paid.map(make).join('')||'<div class="empty">No premium products available.</div>';
+ db=readDB();products=db.products||[];
+ document.getElementById('headline').textContent=db.site?.headline||'NEXUS CYBER';
+ document.getElementById('announcement').textContent=db.site?.announcement||'Explore premium digital products, cybersecurity resources and next-generation technology tools.';
+ const card=p=>`<article class="product"><span class="type">${esc(p.type).toUpperCase()}</span><h3>${esc(p.name)}</h3><p>${esc(p.desc||'Explore this digital product from NEXUS.')}</p><div class="price">${p.type==='Free'?'FREE':esc(p.price)+' '+esc(p.currency||'PKR')}</div>${p.type==='Free'?`<button data-download="${esc(p.id)}">DOWNLOAD</button>`:`<button data-buy="${esc(p.id)}">BUY NOW</button>`}</article>`;
+ document.getElementById('freeProducts').innerHTML=products.filter(p=>p.type==='Free').map(card).join('')||'<div class="empty">No free products available.</div>';
+ document.getElementById('paidProducts').innerHTML=products.filter(p=>p.type!=='Free').map(card).join('')||'<div class="empty">No premium products available.</div>';
 }
-function download(id){
- let p=products.find(x=>x.id===id);
- if(p&&p.link)window.open(p.link,'_blank','noopener');
- else alert('Download link is not configured.');
-}
+document.addEventListener('click',e=>{
+ const d=e.target.closest('[data-download]'),b=e.target.closest('[data-buy]');
+ if(d){const p=products.find(x=>String(x.id)===d.dataset.download);if(p?.link)window.open(p.link,'_blank','noopener');else alert('Download link is not configured.')}
+ if(b)checkout(b.dataset.buy);
+});
 function checkout(id){
- selected=products.find(x=>x.id===id);
- if(!selected)return;
- document.getElementById('selectedProduct').textContent=
- selected.name+' — '+selected.price+' '+selected.currency;
- document.getElementById('paymentDetails').innerHTML=
- '<p style="color:#00ff9d">Payment instructions:</p>'+
- ['jazz','easy','bank','upi'].map(k=>
- '<p>'+k.toUpperCase()+': '+esc(methods[k]||'Not configured')+'</p>'
- ).join('');
+ selected=products.find(x=>String(x.id)===String(id));
+ if(!selected||selected.type==='Free')return;
+ document.getElementById('selectedProduct').textContent=selected.name+' — '+selected.price+' '+(selected.currency||'PKR');
+ const m=db.methods||{};
+ const details=[['JazzCash',m.jazz],['Easypaisa',m.easy],['Raast',m.raast],['Bank Transfer',[m.bank,m.iban].filter(Boolean).join(' | ')],['India UPI',m.upi]];
+ document.getElementById('paymentDetails').innerHTML='<p style="color:#00ff9d">PAYMENT DETAILS</p>'+details.map(([n,v])=>`<p>${esc(n)}: ${esc(v||'Not configured')}</p>`).join('');
  document.getElementById('checkout').style.display='grid';
 }
-function closeCheckout(){
- document.getElementById('checkout').style.display='none';
-}
+function closeCheckout(){document.getElementById('checkout').style.display='none';selected=null}
 function placeOrder(){
  if(!selected)return;
- let name=document.getElementById('customer').value.trim();
- let email=document.getElementById('email').value.trim();
- let method=document.getElementById('payment').value;
- let file=document.getElementById('proof').files[0];
- if(!name||!email)return alert('Enter name and email.');
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
- return alert('Enter a valid email.');
- if(!file)return alert('Please select payment screenshot.');
- if(!file.type.startsWith('image/')||file.size>700000)
- return alert('Choose an image under 700KB.');
- let reader=new FileReader();
+ const name=document.getElementById('customer').value.trim(),email=document.getElementById('email').value.trim(),txn=document.getElementById('txn').value.trim(),method=document.getElementById('payment').value,file=document.getElementById('proof').files[0];
+ if(!name||!email||!txn)return alert('Enter name, email and transaction ID.');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email.');
+ if(!file||!file.type.startsWith('image/'))return alert('Select payment screenshot.');
+ if(file.size>700000)return alert('Image must be under 700KB.');
+ const reader=new FileReader();
  reader.onload=()=>{
-  orders=get('orders',[]);
-  orders.push({
-   id:'NX-'+Date.now(),
-   product:selected.name,
-   productId:selected.id,
-   customer:name,
-   email,
-   amount:Number(selected.price),
-   currency:selected.currency,
-   method,
-   proof:reader.result,
-   status:'Pending',
-   date:new Date().toISOString()
-  });
-  localStorage.setItem('nx_orders',JSON.stringify(orders));
-  alert('Order submitted. Awaiting admin review.');
+  db=readDB();
+  const p=db.products.find(x=>String(x.id)===String(selected.id));
+  if(!p||p.type==='Free')return alert('Product unavailable. Refresh page.');
+  const payment={id:'PAY-'+Date.now(),customer:name,contact:email,product:p.name,productId:p.id,amount:Number(p.price),currency:p.currency||'PKR',method,txn,proof:reader.result,status:'Pending',date:new Date().toISOString()};
+  db.payments=db.payments||[];db.payments.unshift(payment);
+  try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){return alert('Storage full. Use a smaller screenshot.')}
+  alert('Order submitted. Awaiting admin approval.');
+  document.getElementById('customer').value='';document.getElementById('email').value='';document.getElementById('txn').value='';document.getElementById('proof').value='';
   closeCheckout();
  };
  reader.readAsDataURL(file);
 }
-window.addEventListener('storage',e=>{
- if(e.key==='nx_products')render();
- if(e.key==='nx_methods')methods=get('methods',{});
-});
-render();
+function countVisit(){
+ const day=new Date().toISOString().slice(0,10),seen=sessionStorage.getItem('nx_visit_day');
+ if(seen!==day){db=readDB();db.visits=Number(db.visits||0)+1;localStorage.setItem(KEY,JSON.stringify(db));sessionStorage.setItem('nx_visit_day',day)}
+}
+window.addEventListener('storage',e=>{if(e.key===KEY)render()});
+setInterval(render,2000);
+countVisit();render();
 </script>
 </body>
 </html>
