@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NEXUS | Cyber Store</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#030807;color:#eafff5;font-family:Arial}
@@ -17,6 +18,7 @@ a{color:#b8d9ca;text-decoration:none}
 a:hover{color:#00ff9d}
 button{cursor:pointer;background:#063c2c;color:#00ff9d;border:1px solid #00a76b;padding:12px 19px;border-radius:5px}
 button:hover{background:#00a76b;color:#00150d;box-shadow:0 0 20px #00ff9d77}
+button:disabled{opacity:.5;cursor:wait}
 .hero{text-align:center;min-height:570px;padding:100px 20px 65px}
 .hero h1{font-size:clamp(45px,8vw,90px);margin:25px 0;color:#00ff9d;text-shadow:0 0 35px #00ff9d66}
 .hero p{color:#9ab9ac;font-size:17px;max-width:650px;margin:20px auto 30px;line-height:1.8}
@@ -44,17 +46,30 @@ footer{text-align:center;padding:35px;border-top:1px solid #164431;color:#739385
 .modalbox{width:min(440px,100%);background:#091712;border:1px solid #00ff9d;padding:25px;border-radius:12px;max-height:90vh;overflow:auto}
 .modal input,.modal select{width:100%;padding:12px;margin:8px 0;background:#06100d;color:white;border:1px solid #245443;border-radius:5px}
 .close{float:right}
-@media(max-width:600px){header{height:auto;min-height:95px;flex-direction:column;gap:15px;padding:12px}.logo{position:static}nav{gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px}.hero{padding-top:65px}}
+#orderStatus{position:fixed;right:16px;bottom:16px;z-index:30;width:min(360px,calc(100% - 32px));background:#091712;border:1px solid #00ff9d;padding:18px;border-radius:10px;color:#eafff5;box-shadow:0 8px 30px #000;display:none}
+@media(max-width:600px){
+header{height:auto;min-height:95px;flex-direction:column;gap:15px;padding:12px}
+.logo{position:static}
+nav{gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px}
+.hero{padding-top:65px}
+}
 </style>
 </head>
+
 <body>
+
 <canvas id="matrix"></canvas>
+
 <header>
 <div class="logo">NEXUS</div>
 <nav>
-<a href="#home">HOME</a><a href="#free">FREE</a><a href="#premium">PREMIUM</a><a href="#about">ABOUT</a>
+<a href="#home">HOME</a>
+<a href="#free">FREE</a>
+<a href="#premium">PREMIUM</a>
+<a href="#about">ABOUT</a>
 </nav>
 </header>
+
 <section class="hero" id="home">
 <span class="tag">NEXT GENERATION CYBER STORE</span>
 <div class="globe"></div>
@@ -62,8 +77,10 @@ footer{text-align:center;padding:35px;border-top:1px solid #164431;color:#739385
 <p id="announcement">Explore premium digital products, cybersecurity resources and next-generation technology tools.</p>
 <a href="#premium"><button>EXPLORE PRODUCTS →</button></a>
 </section>
+
 <section class="section">
-<h2>WHY NEXUS?</h2><p class="sub">A new digital experience</p>
+<h2>WHY NEXUS?</h2>
+<p class="sub">A new digital experience</p>
 <div class="features">
 <div class="feature"><h3>◈ DIGITAL</h3><p>Digital Products</p></div>
 <div class="feature"><h3>◉ SECURE</h3><p>Secure Checkout Design</p></div>
@@ -71,103 +88,602 @@ footer{text-align:center;padding:35px;border-top:1px solid #164431;color:#739385
 <div class="feature"><h3>⚡ INSTANT</h3><p>Digital Delivery Links</p></div>
 </div>
 </section>
+
 <section class="section" id="free">
-<h2>FREE PRODUCTS</h2><p class="sub">Explore our free collection</p><div class="grid" id="freeProducts"></div>
+<h2>FREE PRODUCTS</h2>
+<p class="sub">Explore our free collection</p>
+<div class="grid" id="freeProducts">
+<div class="empty">Loading products...</div>
+</div>
 </section>
+
 <section class="section" id="premium">
-<h2>PREMIUM PRODUCTS</h2><p class="sub">Explore premium digital products</p><div class="grid" id="paidProducts"></div>
+<h2>PREMIUM PRODUCTS</h2>
+<p class="sub">Explore premium digital products</p>
+<div class="grid" id="paidProducts">
+<div class="empty">Loading products...</div>
+</div>
 </section>
+
 <section class="section" id="about">
-<h2>ABOUT NEXUS</h2><p class="sub">Technology • Innovation • Digital Products</p>
+<h2>ABOUT NEXUS</h2>
+<p class="sub">Technology • Innovation • Digital Products</p>
 </section>
+
 <div class="modal" id="checkout">
 <div class="modalbox">
 <button class="close" onclick="closeCheckout()">CLOSE</button>
 <h2 style="color:#00ff9d">NEXUS CHECKOUT</h2>
 <p id="selectedProduct"></p>
+
 <input id="customer" placeholder="Your Name">
 <input id="email" type="email" placeholder="Your Email">
 <input id="txn" placeholder="Payment Transaction ID">
-<select id="payment"><option>JazzCash</option><option>Easypaisa</option><option>Raast</option><option>Bank Transfer</option><option>UPI</option></select>
+
+<select id="payment">
+<option>JazzCash</option>
+<option>Easypaisa</option>
+<option>Raast</option>
+<option>Bank Transfer</option>
+<option>UPI</option>
+</select>
+
 <div id="paymentDetails"></div>
+
 <label>Payment Screenshot</label>
 <input type="file" id="proof" accept="image/*">
-<button onclick="placeOrder()">SUBMIT ORDER</button>
-<p style="color:#789b8b;font-size:11px">Payment remains pending until admin verification.</p>
+
+<button id="submitOrder" onclick="placeOrder()">SUBMIT ORDER</button>
+
+<p style="color:#789b8b;font-size:11px">
+Payment remains pending until admin verification.
+</p>
 </div>
 </div>
-<footer><div class="logo" style="position:static">NEXUS</div><p>CYBER CONTROL CENTER</p><p>© 2026 NEXUS. All Rights Reserved.</p></footer>
+
+<div id="orderStatus"></div>
+
+<footer>
+<div class="logo" style="position:static">NEXUS</div>
+<p>CYBER CONTROL CENTER</p>
+<p>© 2026 NEXUS. All Rights Reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-// Matrix animation
-const canvas=document.getElementById('matrix'),ctx=canvas.getContext('2d');
-let drops=[];
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight;drops=Array(Math.ceil(canvas.width/17)).fill(1)}
-window.addEventListener('resize',resize);resize();
-function draw(){
- ctx.fillStyle='rgba(3,8,7,.12)';ctx.fillRect(0,0,canvas.width,canvas.height);
- ctx.fillStyle='#00ff9d';ctx.font='14px monospace';
- drops.forEach((y,i)=>{ctx.fillText(Math.random()>.5?'1':'0',i*17,y*17);if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;drops[i]++});
- requestAnimationFrame(draw);
-}draw();
+// SUPABASE CONNECTION
+
+const SUPABASE_URL =
+'https://omooxjoyvsermpfxklak.supabase.co';
+
+const SUPABASE_ANON_KEY =
+'sb_publishable_wtkKCSsizyQu73FmJeQa0A_LRDvtbOn';
+
+const supabase = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+// DATABASE SETTINGS
 
 const KEY='nexus_control_v1';
-const blank=()=>({products:[],orders:[],payments:[],methods:{},site:{},visits:0});
-function readDB(){try{return {...blank(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return blank()}}
-let db=readDB(),products=db.products||[],selected=null;
 
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+let products=[];
+let db={methods:{},site:{}};
+let selected=null;
+let submitting=false;
+
+// MATRIX ANIMATION
+
+const canvas=document.getElementById('matrix');
+const ctx=canvas.getContext('2d');
+let drops=[];
+
+function resize(){
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+drops=Array(Math.ceil(canvas.width/17)).fill(1);
+}
+
+window.addEventListener('resize',resize);
+resize();
+
+function draw(){
+ctx.fillStyle='rgba(3,8,7,.12)';
+ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#00ff9d';
+ctx.font='14px monospace';
+
+drops.forEach((y,i)=>{
+ctx.fillText(Math.random()>.5?'1':'0',i*17,y*17);
+if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;
+drops[i]++;
+});
+
+requestAnimationFrame(draw);
+}
+draw();
+
+// HELPERS
+
+function $(id){
+return document.getElementById(id);
+}
+
+function esc(v){
+return String(v??'').replace(/[&<>"']/g,c=>({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'"':'&quot;',
+"'":'&#39;'
+}[c]));
+}
+
+function readLocal(){
+try{
+return JSON.parse(localStorage.getItem(KEY)||'{}');
+}catch(e){
+return {};
+}
+}
+
+// LOAD PRODUCTS FROM SUPABASE
+
+async function loadProducts(){
+
+$('freeProducts').innerHTML=
+'<div class="empty">Loading products...</div>';
+
+$('paidProducts').innerHTML=
+'<div class="empty">Loading products...</div>';
+
+const {data,error}=await supabase
+.from('products')
+.select('*')
+.eq('active',true)
+.order('created_at',{ascending:false});
+
+if(error){
+console.error('Products error:',error);
+
+$('freeProducts').innerHTML=
+'<div class="empty">Products could not load. Please check database access.</div>';
+
+$('paidProducts').innerHTML=
+'<div class="empty">Products could not load. Please check database access.</div>';
+
+return;
+}
+
+products=(data||[]).map(p=>({
+...p,
+desc:p.description||p.desc||'',
+link:p.free_link||p.link||''
+}));
+
+render();
+}
+
+// RENDER PRODUCTS
 
 function render(){
- db=readDB();products=db.products||[];
- document.getElementById('headline').textContent=db.site?.headline||'NEXUS CYBER';
- document.getElementById('announcement').textContent=db.site?.announcement||'Explore premium digital products, cybersecurity resources and next-generation technology tools.';
- const card=p=>`<article class="product"><span class="type">${esc(p.type).toUpperCase()}</span><h3>${esc(p.name)}</h3><p>${esc(p.desc||'Explore this digital product from NEXUS.')}</p><div class="price">${p.type==='Free'?'FREE':esc(p.price)+' '+esc(p.currency||'PKR')}</div>${p.type==='Free'?`<button data-download="${esc(p.id)}">DOWNLOAD</button>`:`<button data-buy="${esc(p.id)}">BUY NOW</button>`}</article>`;
- document.getElementById('freeProducts').innerHTML=products.filter(p=>p.type==='Free').map(card).join('')||'<div class="empty">No free products available.</div>';
- document.getElementById('paidProducts').innerHTML=products.filter(p=>p.type!=='Free').map(card).join('')||'<div class="empty">No premium products available.</div>';
+
+const local=readLocal();
+
+db={
+methods:local.methods||{},
+site:local.site||{}
+};
+
+$('headline').textContent=
+db.site.headline||'NEXUS CYBER';
+
+$('announcement').textContent=
+db.site.announcement||
+'Explore premium digital products, cybersecurity resources and next-generation technology tools.';
+
+const card=p=>`
+<article class="product">
+
+<span class="type">
+${esc(p.type).toUpperCase()}
+</span>
+
+<h3>${esc(p.name)}</h3>
+
+<p>${esc(p.desc||'Explore this digital product from NEXUS.')}</p>
+
+<div class="price">
+${String(p.type).toLowerCase()==='free'
+?'FREE'
+:esc(p.price)+' '+esc(p.currency||'PKR')}
+</div>
+
+${String(p.type).toLowerCase()==='free'
+?`<button data-download="${esc(p.id)}">DOWNLOAD</button>`
+:`<button data-buy="${esc(p.id)}">BUY NOW</button>`}
+
+</article>
+`;
+
+$('freeProducts').innerHTML=
+products.filter(p=>String(p.type).toLowerCase()==='free')
+.map(card).join('')||
+'<div class="empty">No free products available.</div>';
+
+$('paidProducts').innerHTML=
+products.filter(p=>String(p.type).toLowerCase()!=='free')
+.map(card).join('')||
+'<div class="empty">No premium products available.</div>';
+
 }
+
+// PRODUCT BUTTONS
+
 document.addEventListener('click',e=>{
- const d=e.target.closest('[data-download]'),b=e.target.closest('[data-buy]');
- if(d){const p=products.find(x=>String(x.id)===d.dataset.download);if(p?.link)window.open(p.link,'_blank','noopener');else alert('Download link is not configured.')}
- if(b)checkout(b.dataset.buy);
+
+const d=e.target.closest('[data-download]');
+const b=e.target.closest('[data-buy]');
+
+if(d){
+const p=products.find(x=>String(x.id)===d.dataset.download);
+
+if(p&&p.link){
+window.open(p.link,'_blank','noopener');
+}else{
+alert('Download link is not configured.');
+}
+}
+
+if(b){
+checkout(b.dataset.buy);
+}
+
 });
+
+// CHECKOUT
+
 function checkout(id){
- selected=products.find(x=>String(x.id)===String(id));
- if(!selected||selected.type==='Free')return;
- document.getElementById('selectedProduct').textContent=selected.name+' — '+selected.price+' '+(selected.currency||'PKR');
- const m=db.methods||{};
- const details=[['JazzCash',m.jazz],['Easypaisa',m.easy],['Raast',m.raast],['Bank Transfer',[m.bank,m.iban].filter(Boolean).join(' | ')],['India UPI',m.upi]];
- document.getElementById('paymentDetails').innerHTML='<p style="color:#00ff9d">PAYMENT DETAILS</p>'+details.map(([n,v])=>`<p>${esc(n)}: ${esc(v||'Not configured')}</p>`).join('');
- document.getElementById('checkout').style.display='grid';
+
+selected=products.find(x=>String(x.id)===String(id));
+
+if(!selected)return;
+
+if(String(selected.type).toLowerCase()==='free')return;
+
+$('selectedProduct').textContent=
+selected.name+' — '+selected.price+' '+(selected.currency||'PKR');
+
+const m=db.methods||{};
+
+const details=[
+['JazzCash',m.jazz],
+['Easypaisa',m.easy],
+['Raast',m.raast],
+['Bank Transfer',[m.bank,m.iban].filter(Boolean).join(' | ')],
+['UPI',m.upi]
+];
+
+$('paymentDetails').innerHTML=
+'<p style="color:#00ff9d">PAYMENT DETAILS</p>'+
+details.map(([n,v])=>
+`<p>${esc(n)}: ${esc(v||'Not configured')}</p>`
+).join('');
+
+$('checkout').style.display='grid';
 }
-function closeCheckout(){document.getElementById('checkout').style.display='none';selected=null}
-function placeOrder(){
- if(!selected)return;
- const name=document.getElementById('customer').value.trim(),email=document.getElementById('email').value.trim(),txn=document.getElementById('txn').value.trim(),method=document.getElementById('payment').value,file=document.getElementById('proof').files[0];
- if(!name||!email||!txn)return alert('Enter name, email and transaction ID.');
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email.');
- if(!file||!file.type.startsWith('image/'))return alert('Select payment screenshot.');
- if(file.size>700000)return alert('Image must be under 700KB.');
- const reader=new FileReader();
- reader.onload=()=>{
-  db=readDB();
-  const p=db.products.find(x=>String(x.id)===String(selected.id));
-  if(!p||p.type==='Free')return alert('Product unavailable. Refresh page.');
-  const payment={id:'PAY-'+Date.now(),customer:name,contact:email,product:p.name,productId:p.id,amount:Number(p.price),currency:p.currency||'PKR',method,txn,proof:reader.result,status:'Pending',date:new Date().toISOString()};
-  db.payments=db.payments||[];db.payments.unshift(payment);
-  try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){return alert('Storage full. Use a smaller screenshot.')}
-  alert('Order submitted. Awaiting admin approval.');
-  document.getElementById('customer').value='';document.getElementById('email').value='';document.getElementById('txn').value='';document.getElementById('proof').value='';
-  closeCheckout();
- };
- reader.readAsDataURL(file);
+
+function closeCheckout(){
+$('checkout').style.display='none';
+selected=null;
 }
+
+// CUSTOMER ORDER SUBMISSION
+
+async function placeOrder(){
+
+if(submitting||!selected)return;
+
+const name=$('customer').value.trim();
+const email=$('email').value.trim();
+const txn=$('txn').value.trim();
+const method=$('payment').value;
+const file=$('proof').files[0];
+
+if(!name||!email||!txn){
+alert('Enter name, email and transaction ID.');
+return;
+}
+
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+alert('Enter a valid email.');
+return;
+}
+
+if(!file||!file.type.startsWith('image/')){
+alert('Select payment screenshot.');
+return;
+}
+
+if(file.size>700000){
+alert('Image must be under 700KB.');
+return;
+}
+
+submitting=true;
+$('submitOrder').disabled=true;
+$('submitOrder').textContent='UPLOADING...';
+
+let proofPath=null;
+
+try{
+
+// VERIFY PRODUCT FROM DATABASE
+
+const {data:product,error:productError}=await supabase
+.from('products')
+.select('id,name,type,price,currency,active')
+.eq('id',selected.id)
+.eq('active',true)
+.single();
+
+if(productError||!product){
+throw new Error('Product unavailable. Refresh the page.');
+}
+
+if(String(product.type).toLowerCase()==='free'){
+throw new Error('This product is free.');
+}
+
+// UPLOAD SCREENSHOT
+
+const ext=(file.name.split('.').pop()||'jpg')
+.toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+
+const token=crypto.randomUUID();
+
+proofPath=token+'.'+ext;
+
+const {error:uploadError}=await supabase.storage
+.from('payment-proofs')
+.upload(proofPath,file,{
+contentType:file.type,
+upsert:false
+});
+
+if(uploadError)throw uploadError;
+
+// SAVE PAYMENT AND ORDER
+
+const paymentData={
+customer:name,
+contact:email,
+product_id:product.id,
+product_name:product.name,
+amount:Number(product.price),
+currency:product.currency||'PKR',
+method:method,
+txn:txn,
+proof_path:proofPath,
+status:'Pending',
+customer_token:token
+};
+
+const {error:paymentError}=await supabase
+.from('payments')
+.insert(paymentData);
+
+if(paymentError)throw paymentError;
+
+// SAVE CUSTOMER TRACKING TOKEN
+
+let saved=[];
+
+try{
+saved=JSON.parse(
+localStorage.getItem('nexus_customer_orders')||'[]'
+);
+}catch(e){}
+
+saved.unshift({
+token:token,
+product:product.name
+});
+
+localStorage.setItem(
+'nexus_customer_orders',
+JSON.stringify(saved.slice(0,20))
+);
+
+alert('Your order has been submitted successfully. Payment is waiting for admin approval.');
+
+$('customer').value='';
+$('email').value='';
+$('txn').value='';
+$('proof').value='';
+
+closeCheckout();
+
+showOrderStatus(token);
+
+}catch(error){
+
+console.error(error);
+
+if(proofPath){
+await supabase.storage
+.from('payment-proofs')
+.remove([proofPath]);
+}
+
+alert('Order submission failed: '+error.message);
+
+}finally{
+
+submitting=false;
+$('submitOrder').disabled=false;
+$('submitOrder').textContent='SUBMIT ORDER';
+
+}
+
+}
+
+// CUSTOMER ORDER STATUS
+
+function showOrderStatus(token){
+
+const box=$('orderStatus');
+
+box.style.display='block';
+
+box.innerHTML=`
+<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+<h3 style="color:#00ff9d">NEXUS ORDER STATUS</h3>
+<p>Checking payment status...</p>
+`;
+
+checkCustomerOrder(token);
+}
+
+async function checkCustomerOrder(token){
+
+const box=$('orderStatus');
+
+const {data,error}=await supabase.rpc(
+'get_customer_order',
+{
+p_customer_token:token
+}
+);
+
+if(error){
+console.error(error);
+box.innerHTML=`
+<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+<h3 style="color:#00ff9d">ORDER STATUS</h3>
+<p>Status temporarily unavailable.</p>
+`;
+return;
+}
+
+const order=Array.isArray(data)?data[0]:data;
+
+if(!order){
+box.innerHTML=`
+<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+<h3 style="color:#00ff9d">ORDER STATUS</h3>
+<p>Order not found.</p>
+`;
+return;
+}
+
+let html=`
+<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+<h3 style="color:#00ff9d">NEXUS ORDER STATUS</h3>
+<p>Product: ${esc(order.product_name)}</p>
+<p>Status: <b>${esc(order.status)}</b></p>
+`;
+
+if(order.status==='Approved'&&order.download_url){
+
+html+=`
+<a href="${esc(order.download_url)}" target="_blank" rel="noopener">
+<button>DOWNLOAD PRODUCT</button>
+</a>
+`;
+
+}else if(order.status==='Rejected'){
+
+html+='<p>Payment rejected. Please contact support.</p>';
+
+}else{
+
+html+='<p>Payment is waiting for admin verification.</p>';
+
+}
+
+box.innerHTML=html;
+}
+
+// RESTORE CUSTOMER ORDER STATUS
+
+function resumeCustomerOrders(){
+
+let saved=[];
+
+try{
+saved=JSON.parse(
+localStorage.getItem('nexus_customer_orders')||'[]'
+);
+}catch(e){}
+
+if(saved.length){
+showOrderStatus(saved[0].token);
+}
+
+}
+
+// VISITOR COUNT
+
 function countVisit(){
- const day=new Date().toISOString().slice(0,10),seen=sessionStorage.getItem('nx_visit_day');
- if(seen!==day){db=readDB();db.visits=Number(db.visits||0)+1;localStorage.setItem(KEY,JSON.stringify(db));sessionStorage.setItem('nx_visit_day',day)}
+
+const day=new Date().toISOString().slice(0,10);
+const seen=sessionStorage.getItem('nx_visit_day');
+
+if(seen!==day){
+
+let local=readLocal();
+
+local.visits=Number(local.visits||0)+1;
+
+localStorage.setItem(KEY,JSON.stringify(local));
+
+sessionStorage.setItem('nx_visit_day',day);
+
 }
-window.addEventListener('storage',e=>{if(e.key===KEY)render()});
-setInterval(render,2000);
-countVisit();render();
+
+}
+
+// REALTIME PRODUCT UPDATES
+
+supabase.channel('nexus-products-live')
+.on(
+'postgres_changes',
+{
+event:'*',
+schema:'public',
+table:'products'
+},
+()=>loadProducts()
+)
+.subscribe();
+
+// CUSTOMER STATUS AUTO REFRESH
+
+setInterval(()=>{
+
+let saved=[];
+
+try{
+saved=JSON.parse(
+localStorage.getItem('nexus_customer_orders')||'[]'
+);
+}catch(e){}
+
+if(saved[0]&&$('orderStatus').style.display==='block'){
+checkCustomerOrder(saved[0].token);
+}
+
+},10000);
+
+// START WEBSITE
+
+countVisit();
+loadProducts();
+resumeCustomerOrders();
+
 </script>
 </body>
 </html>
