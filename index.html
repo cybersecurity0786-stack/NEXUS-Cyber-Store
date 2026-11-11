@@ -37,7 +37,7 @@ button:disabled{opacity:.5;cursor:wait}
 .product p{color:#91b1a2;line-height:1.6}
 .price{font-size:23px;color:white;margin:20px 0}
 .type{font-size:11px;color:#00ff9d;letter-spacing:2px}
-.empty{text-align:center;color:#719184;padding:40px}
+.empty{text-align:center;color:#719184;padding:40px;grid-column:1/-1;overflow-wrap:anywhere}
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
 .feature{padding:24px;text-align:center;border:1px solid #124634;background:#091612;border-radius:10px}
 .feature h3{color:#00ff9d}
@@ -93,7 +93,7 @@ nav{gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px}
 <h2>FREE PRODUCTS</h2>
 <p class="sub">Explore our free collection</p>
 <div class="grid" id="freeProducts">
-<div class="empty">Loading products...</div>
+<div class="empty">Loading Free Products...</div>
 </div>
 </section>
 
@@ -101,7 +101,7 @@ nav{gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px}
 <h2>PREMIUM PRODUCTS</h2>
 <p class="sub">Explore premium digital products</p>
 <div class="grid" id="paidProducts">
-<div class="empty">Loading products...</div>
+<div class="empty">Loading Premium Products...</div>
 </div>
 </section>
 
@@ -161,185 +161,217 @@ const SUPABASE_ANON_KEY =
 'sb_publishable_wtkKCSsizyQu73FmJeQa0A_LRDvtbOn';
 
 const supabase = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
 
 // DATABASE SETTINGS
 
-const KEY='nexus_control_v1';
+const KEY = 'nexus_control_v1';
 
-let products=[];
-let db={methods:{},site:{}};
-let selected=null;
-let submitting=false;
+let products = [];
+let db = {methods:{},site:{}};
+let selected = null;
+let submitting = false;
+
+let productsLoading = false;
+let productsReloadAgain = false;
 
 // MATRIX ANIMATION
 
-const canvas=document.getElementById('matrix');
-const ctx=canvas.getContext('2d');
-let drops=[];
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+let drops = [];
 
 function resize(){
-canvas.width=innerWidth;
-canvas.height=innerHeight;
-drops=Array(Math.ceil(canvas.width/17)).fill(1);
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  drops = Array(Math.ceil(canvas.width/17)).fill(1);
 }
 
 window.addEventListener('resize',resize);
 resize();
 
 function draw(){
-ctx.fillStyle='rgba(3,8,7,.12)';
-ctx.fillRect(0,0,canvas.width,canvas.height);
-ctx.fillStyle='#00ff9d';
-ctx.font='14px monospace';
+  ctx.fillStyle = 'rgba(3,8,7,.12)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#00ff9d';
+  ctx.font = '14px monospace';
 
-drops.forEach((y,i)=>{
-ctx.fillText(Math.random()>.5?'1':'0',i*17,y*17);
-if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;
-drops[i]++;
-});
+  drops.forEach((y,i)=>{
+    ctx.fillText(Math.random()>.5?'1':'0',i*17,y*17);
+    if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;
+    drops[i]++;
+  });
 
-requestAnimationFrame(draw);
+  requestAnimationFrame(draw);
 }
 draw();
 
 // HELPERS
 
 function $(id){
-return document.getElementById(id);
+  return document.getElementById(id);
 }
 
 function esc(v){
-return String(v??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#39;'
-}[c]));
+  return String(v??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
 }
 
 function readLocal(){
-try{
-return JSON.parse(localStorage.getItem(KEY)||'{}');
-}catch(e){
-return {};
-}
+  try{
+    return JSON.parse(localStorage.getItem(KEY)||'{}');
+  }catch(e){
+    return {};
+  }
 }
 
 // LOAD PRODUCTS FROM SUPABASE
 
 async function loadProducts(){
 
-$('freeProducts').innerHTML=
-'<div class="empty">Loading products...</div>';
+  if(productsLoading){
+    productsReloadAgain = true;
+    return;
+  }
 
-$('paidProducts').innerHTML=
-'<div class="empty">Loading products...</div>';
+  productsLoading = true;
 
-const {data,error}=await supabase
-.from('products')
-.select('*')
-.eq('active',true)
-.order('created_at',{ascending:false});
+  $('freeProducts').innerHTML =
+    '<div class="empty">Loading Free Products...</div>';
 
-if(error){
-console.error('Products error:',error);
+  $('paidProducts').innerHTML =
+    '<div class="empty">Loading Premium Products...</div>';
 
-$('freeProducts').innerHTML=
-'<div class="empty">Products could not load. Please check database access.</div>';
+  try{
 
-$('paidProducts').innerHTML=
-'<div class="empty">Products could not load. Please check database access.</div>';
+    const {data,error} = await supabase
+      .from('products')
+      .select('id,name,type,price,currency,description,free_link,active,created_at')
+      .eq('active',true)
+      .order('created_at',{ascending:false});
 
-return;
-}
+    if(error) throw error;
 
-products=(data||[]).map(p=>({
-...p,
-desc:p.description||p.desc||'',
-link:p.free_link||p.link||''
-}));
+    products = (data||[]).map(p=>({
+      ...p,
+      type:String(p.type||'').trim(),
+      desc:p.description||p.desc||'',
+      link:p.free_link||p.link||''
+    }));
 
-render();
+    render();
+
+  }catch(error){
+
+    console.error('NEXUS PRODUCTS ERROR:',error);
+
+    const message = esc(error.message||'Unknown database error');
+
+    $('freeProducts').innerHTML =
+      `<div class="empty">Products Error: ${message}</div>`;
+
+    $('paidProducts').innerHTML =
+      `<div class="empty">Products Error: ${message}</div>`;
+
+  }finally{
+
+    productsLoading = false;
+
+    if(productsReloadAgain){
+      productsReloadAgain = false;
+      loadProducts();
+    }
+  }
 }
 
 // RENDER PRODUCTS
 
 function render(){
 
-const local=readLocal();
+  const local = readLocal();
 
-db={
-methods:local.methods||{},
-site:local.site||{}
-};
+  db = {
+    methods:local.methods||{},
+    site:local.site||{}
+  };
 
-$('headline').textContent=
-db.site.headline||'NEXUS CYBER';
+  $('headline').textContent =
+    db.site.headline||'NEXUS CYBER';
 
-$('announcement').textContent=
-db.site.announcement||
-'Explore premium digital products, cybersecurity resources and next-generation technology tools.';
+  $('announcement').textContent =
+    db.site.announcement||
+    'Explore premium digital products, cybersecurity resources and next-generation technology tools.';
 
-const card=p=>`
-<article class="product">
+  const card = p => `
+    <article class="product">
 
-<span class="type">
-${esc(p.type).toUpperCase()}
-</span>
+      <span class="type">
+        ${esc(p.type).toUpperCase()}
+      </span>
 
-<h3>${esc(p.name)}</h3>
+      <h3>${esc(p.name)}</h3>
 
-<p>${esc(p.desc||'Explore this digital product from NEXUS.')}</p>
+      <p>${esc(p.desc||'Explore this digital product from NEXUS.')}</p>
 
-<div class="price">
-${String(p.type).toLowerCase()==='free'
-?'FREE'
-:esc(p.price)+' '+esc(p.currency||'PKR')}
-</div>
+      <div class="price">
+        ${String(p.type).toLowerCase()==='free'
+          ?'FREE'
+          :esc(p.price)+' '+esc(p.currency||'PKR')}
+      </div>
 
-${String(p.type).toLowerCase()==='free'
-?`<button data-download="${esc(p.id)}">DOWNLOAD</button>`
-:`<button data-buy="${esc(p.id)}">BUY NOW</button>`}
+      ${String(p.type).toLowerCase()==='free'
+        ?`<button data-download="${esc(p.id)}">DOWNLOAD</button>`
+        :`<button data-buy="${esc(p.id)}">BUY NOW</button>`}
 
-</article>
-`;
+    </article>
+  `;
 
-$('freeProducts').innerHTML=
-products.filter(p=>String(p.type).toLowerCase()==='free')
-.map(card).join('')||
-'<div class="empty">No free products available.</div>';
+  const free = products.filter(
+    p=>String(p.type).trim().toLowerCase()==='free'
+  );
 
-$('paidProducts').innerHTML=
-products.filter(p=>String(p.type).toLowerCase()!=='free')
-.map(card).join('')||
-'<div class="empty">No premium products available.</div>';
+  const premium = products.filter(
+    p=>String(p.type).trim().toLowerCase()!=='free'
+  );
 
+  $('freeProducts').innerHTML =
+    free.map(card).join('')||
+    '<div class="empty">No free products available.</div>';
+
+  $('paidProducts').innerHTML =
+    premium.map(card).join('')||
+    '<div class="empty">No premium products available.</div>';
 }
 
 // PRODUCT BUTTONS
 
 document.addEventListener('click',e=>{
 
-const d=e.target.closest('[data-download]');
-const b=e.target.closest('[data-buy]');
+  const d = e.target.closest('[data-download]');
+  const b = e.target.closest('[data-buy]');
 
-if(d){
-const p=products.find(x=>String(x.id)===d.dataset.download);
+  if(d){
+    const p = products.find(
+      x=>String(x.id)===d.dataset.download
+    );
 
-if(p&&p.link){
-window.open(p.link,'_blank','noopener');
-}else{
-alert('Download link is not configured.');
-}
-}
+    if(p&&p.link){
+      window.open(p.link,'_blank','noopener');
+    }else{
+      alert('Download link is not configured.');
+    }
+  }
 
-if(b){
-checkout(b.dataset.buy);
-}
+  if(b){
+    checkout(b.dataset.buy);
+  }
 
 });
 
@@ -347,334 +379,335 @@ checkout(b.dataset.buy);
 
 function checkout(id){
 
-selected=products.find(x=>String(x.id)===String(id));
+  selected = products.find(
+    x=>String(x.id)===String(id)
+  );
 
-if(!selected)return;
+  if(!selected)return;
 
-if(String(selected.type).toLowerCase()==='free')return;
+  if(String(selected.type).toLowerCase()==='free')return;
 
-$('selectedProduct').textContent=
-selected.name+' — '+selected.price+' '+(selected.currency||'PKR');
+  $('selectedProduct').textContent =
+    selected.name+' — '+selected.price+' '+(selected.currency||'PKR');
 
-const m=db.methods||{};
+  const m = db.methods||{};
 
-const details=[
-['JazzCash',m.jazz],
-['Easypaisa',m.easy],
-['Raast',m.raast],
-['Bank Transfer',[m.bank,m.iban].filter(Boolean).join(' | ')],
-['UPI',m.upi]
-];
+  const details = [
+    ['JazzCash',m.jazz],
+    ['Easypaisa',m.easy],
+    ['Raast',m.raast],
+    ['Bank Transfer',[m.bank,m.iban].filter(Boolean).join(' | ')],
+    ['UPI',m.upi]
+  ];
 
-$('paymentDetails').innerHTML=
-'<p style="color:#00ff9d">PAYMENT DETAILS</p>'+
-details.map(([n,v])=>
-`<p>${esc(n)}: ${esc(v||'Not configured')}</p>`
-).join('');
+  $('paymentDetails').innerHTML =
+    '<p style="color:#00ff9d">PAYMENT DETAILS</p>'+
+    details.map(([n,v])=>
+      `<p>${esc(n)}: ${esc(v||'Not configured')}</p>`
+    ).join('');
 
-$('checkout').style.display='grid';
+  $('checkout').style.display = 'grid';
 }
 
 function closeCheckout(){
-$('checkout').style.display='none';
-selected=null;
+  $('checkout').style.display = 'none';
+  selected = null;
 }
 
 // CUSTOMER ORDER SUBMISSION
 
 async function placeOrder(){
 
-if(submitting||!selected)return;
+  if(submitting||!selected)return;
 
-const name=$('customer').value.trim();
-const email=$('email').value.trim();
-const txn=$('txn').value.trim();
-const method=$('payment').value;
-const file=$('proof').files[0];
+  const name = $('customer').value.trim();
+  const email = $('email').value.trim();
+  const txn = $('txn').value.trim();
+  const method = $('payment').value;
+  const file = $('proof').files[0];
 
-if(!name||!email||!txn){
-alert('Enter name, email and transaction ID.');
-return;
-}
+  if(!name||!email||!txn){
+    alert('Enter name, email and transaction ID.');
+    return;
+  }
 
-if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-alert('Enter a valid email.');
-return;
-}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    alert('Enter a valid email.');
+    return;
+  }
 
-if(!file||!file.type.startsWith('image/')){
-alert('Select payment screenshot.');
-return;
-}
+  if(!file||!file.type.startsWith('image/')){
+    alert('Select payment screenshot.');
+    return;
+  }
 
-if(file.size>700000){
-alert('Image must be under 700KB.');
-return;
-}
+  if(file.size>700000){
+    alert('Image must be under 700KB.');
+    return;
+  }
 
-submitting=true;
-$('submitOrder').disabled=true;
-$('submitOrder').textContent='UPLOADING...';
+  submitting = true;
+  $('submitOrder').disabled = true;
+  $('submitOrder').textContent = 'UPLOADING...';
 
-let proofPath=null;
+  let proofPath = null;
 
-try{
+  try{
 
-// VERIFY PRODUCT FROM DATABASE
+    // VERIFY PRODUCT FROM DATABASE
 
-const {data:product,error:productError}=await supabase
-.from('products')
-.select('id,name,type,price,currency,active')
-.eq('id',selected.id)
-.eq('active',true)
-.single();
+    const {data:product,error:productError} = await supabase
+      .from('products')
+      .select('id,name,type,price,currency,active')
+      .eq('id',selected.id)
+      .eq('active',true)
+      .single();
 
-if(productError||!product){
-throw new Error('Product unavailable. Refresh the page.');
-}
+    if(productError||!product){
+      throw new Error('Product unavailable. Refresh the page.');
+    }
 
-if(String(product.type).toLowerCase()==='free'){
-throw new Error('This product is free.');
-}
+    if(String(product.type).toLowerCase()==='free'){
+      throw new Error('This product is free.');
+    }
 
-// UPLOAD SCREENSHOT
+    // UPLOAD SCREENSHOT
 
-const ext=(file.name.split('.').pop()||'jpg')
-.toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const ext = (file.name.split('.').pop()||'jpg')
+      .toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
 
-const token=crypto.randomUUID();
+    const token = crypto.randomUUID();
 
-proofPath=token+'.'+ext;
+    proofPath = token+'.'+ext;
 
-const {error:uploadError}=await supabase.storage
-.from('payment-proofs')
-.upload(proofPath,file,{
-contentType:file.type,
-upsert:false
-});
+    const {error:uploadError} = await supabase.storage
+      .from('payment-proofs')
+      .upload(proofPath,file,{
+        contentType:file.type,
+        upsert:false
+      });
 
-if(uploadError)throw uploadError;
+    if(uploadError)throw uploadError;
 
-// SAVE PAYMENT AND ORDER
+    // SAVE PAYMENT AND ORDER
 
-const paymentData={
-customer:name,
-contact:email,
-product_id:product.id,
-product_name:product.name,
-amount:Number(product.price),
-currency:product.currency||'PKR',
-method:method,
-txn:txn,
-proof_path:proofPath,
-status:'Pending',
-customer_token:token
-};
+    const paymentData = {
+      customer:name,
+      contact:email,
+      product_id:product.id,
+      product_name:product.name,
+      amount:Number(product.price),
+      currency:product.currency||'PKR',
+      method:method,
+      txn:txn,
+      proof_path:proofPath,
+      status:'Pending',
+      customer_token:token
+    };
 
-const {error:paymentError}=await supabase
-.from('payments')
-.insert(paymentData);
+    const {error:paymentError} = await supabase
+      .from('payments')
+      .insert(paymentData);
 
-if(paymentError)throw paymentError;
+    if(paymentError)throw paymentError;
 
-// SAVE CUSTOMER TRACKING TOKEN
+    // SAVE CUSTOMER TRACKING TOKEN
 
-let saved=[];
+    let saved = [];
 
-try{
-saved=JSON.parse(
-localStorage.getItem('nexus_customer_orders')||'[]'
-);
-}catch(e){}
+    try{
+      saved = JSON.parse(
+        localStorage.getItem('nexus_customer_orders')||'[]'
+      );
+    }catch(e){}
 
-saved.unshift({
-token:token,
-product:product.name
-});
+    saved.unshift({
+      token:token,
+      product:product.name
+    });
 
-localStorage.setItem(
-'nexus_customer_orders',
-JSON.stringify(saved.slice(0,20))
-);
+    localStorage.setItem(
+      'nexus_customer_orders',
+      JSON.stringify(saved.slice(0,20))
+    );
 
-alert('Your order has been submitted successfully. Payment is waiting for admin approval.');
+    alert('Your order has been submitted successfully. Payment is waiting for admin approval.');
 
-$('customer').value='';
-$('email').value='';
-$('txn').value='';
-$('proof').value='';
+    $('customer').value = '';
+    $('email').value = '';
+    $('txn').value = '';
+    $('proof').value = '';
 
-closeCheckout();
+    closeCheckout();
+    showOrderStatus(token);
 
-showOrderStatus(token);
+  }catch(error){
 
-}catch(error){
+    console.error(error);
 
-console.error(error);
+    if(proofPath){
+      await supabase.storage
+        .from('payment-proofs')
+        .remove([proofPath]);
+    }
 
-if(proofPath){
-await supabase.storage
-.from('payment-proofs')
-.remove([proofPath]);
-}
+    alert('Order submission failed: '+error.message);
 
-alert('Order submission failed: '+error.message);
+  }finally{
 
-}finally{
+    submitting = false;
+    $('submitOrder').disabled = false;
+    $('submitOrder').textContent = 'SUBMIT ORDER';
 
-submitting=false;
-$('submitOrder').disabled=false;
-$('submitOrder').textContent='SUBMIT ORDER';
-
-}
-
+  }
 }
 
 // CUSTOMER ORDER STATUS
 
 function showOrderStatus(token){
 
-const box=$('orderStatus');
+  const box = $('orderStatus');
 
-box.style.display='block';
+  box.style.display = 'block';
 
-box.innerHTML=`
-<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
-<h3 style="color:#00ff9d">NEXUS ORDER STATUS</h3>
-<p>Checking payment status...</p>
-`;
+  box.innerHTML = `
+    <button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+    <h3 style="color:#00ff9d">NEXUS ORDER STATUS</h3>
+    <p>Checking payment status...</p>
+  `;
 
-checkCustomerOrder(token);
+  checkCustomerOrder(token);
 }
 
 async function checkCustomerOrder(token){
 
-const box=$('orderStatus');
+  const box = $('orderStatus');
 
-const {data,error}=await supabase.rpc(
-'get_customer_order',
-{
-p_customer_token:token
-}
-);
+  const {data,error} = await supabase.rpc(
+    'get_customer_order',
+    {
+      p_customer_token:token
+    }
+  );
 
-if(error){
-console.error(error);
-box.innerHTML=`
-<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
-<h3 style="color:#00ff9d">ORDER STATUS</h3>
-<p>Status temporarily unavailable.</p>
-`;
-return;
-}
+  if(error){
+    console.error(error);
+    box.innerHTML = `
+      <button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+      <h3 style="color:#00ff9d">ORDER STATUS</h3>
+      <p>Status temporarily unavailable.</p>
+    `;
+    return;
+  }
 
-const order=Array.isArray(data)?data[0]:data;
+  const order = Array.isArray(data)?data[0]:data;
 
-if(!order){
-box.innerHTML=`
-<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
-<h3 style="color:#00ff9d">ORDER STATUS</h3>
-<p>Order not found.</p>
-`;
-return;
-}
+  if(!order){
+    box.innerHTML = `
+      <button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+      <h3 style="color:#00ff9d">ORDER STATUS</h3>
+      <p>Order not found.</p>
+    `;
+    return;
+  }
 
-let html=`
-<button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
-<h3 style="color:#00ff9d">NEXUS ORDER STATUS</h3>
-<p>Product: ${esc(order.product_name)}</p>
-<p>Status: <b>${esc(order.status)}</b></p>
-`;
+  let html = `
+    <button style="float:right" onclick="this.parentElement.style.display='none'">CLOSE</button>
+    <h3 style="color:#00ff9d">NEXUS ORDER STATUS</h3>
+    <p>Product: ${esc(order.product_name)}</p>
+    <p>Status: <b>${esc(order.status)}</b></p>
+  `;
 
-if(order.status==='Approved'&&order.download_url){
+  if(order.status==='Approved'&&order.download_url){
 
-html+=`
-<a href="${esc(order.download_url)}" target="_blank" rel="noopener">
-<button>DOWNLOAD PRODUCT</button>
-</a>
-`;
+    html += `
+      <a href="${esc(order.download_url)}" target="_blank" rel="noopener">
+        <button>DOWNLOAD PRODUCT</button>
+      </a>
+    `;
 
-}else if(order.status==='Rejected'){
+  }else if(order.status==='Rejected'){
 
-html+='<p>Payment rejected. Please contact support.</p>';
+    html += '<p>Payment rejected. Please contact support.</p>';
 
-}else{
+  }else{
 
-html+='<p>Payment is waiting for admin verification.</p>';
+    html += '<p>Payment is waiting for admin verification.</p>';
 
-}
+  }
 
-box.innerHTML=html;
+  box.innerHTML = html;
 }
 
 // RESTORE CUSTOMER ORDER STATUS
 
 function resumeCustomerOrders(){
 
-let saved=[];
+  let saved = [];
 
-try{
-saved=JSON.parse(
-localStorage.getItem('nexus_customer_orders')||'[]'
-);
-}catch(e){}
+  try{
+    saved = JSON.parse(
+      localStorage.getItem('nexus_customer_orders')||'[]'
+    );
+  }catch(e){}
 
-if(saved.length){
-showOrderStatus(saved[0].token);
-}
-
+  if(saved.length){
+    showOrderStatus(saved[0].token);
+  }
 }
 
 // VISITOR COUNT
 
 function countVisit(){
 
-const day=new Date().toISOString().slice(0,10);
-const seen=sessionStorage.getItem('nx_visit_day');
+  const day = new Date().toISOString().slice(0,10);
+  const seen = sessionStorage.getItem('nx_visit_day');
 
-if(seen!==day){
+  if(seen!==day){
 
-let local=readLocal();
+    let local = readLocal();
 
-local.visits=Number(local.visits||0)+1;
+    local.visits = Number(local.visits||0)+1;
 
-localStorage.setItem(KEY,JSON.stringify(local));
+    localStorage.setItem(KEY,JSON.stringify(local));
 
-sessionStorage.setItem('nx_visit_day',day);
+    sessionStorage.setItem('nx_visit_day',day);
 
-}
-
+  }
 }
 
 // REALTIME PRODUCT UPDATES
 
-supabase.channel('nexus-products-live')
-.on(
-'postgres_changes',
-{
-event:'*',
-schema:'public',
-table:'products'
-},
-()=>loadProducts()
-)
-.subscribe();
+supabase
+  .channel('nexus-products-live')
+  .on(
+    'postgres_changes',
+    {
+      event:'*',
+      schema:'public',
+      table:'products'
+    },
+    ()=>loadProducts()
+  )
+  .subscribe(status=>{
+    console.log('NEXUS Realtime:',status);
+  });
 
 // CUSTOMER STATUS AUTO REFRESH
 
 setInterval(()=>{
 
-let saved=[];
+  let saved = [];
 
-try{
-saved=JSON.parse(
-localStorage.getItem('nexus_customer_orders')||'[]'
-);
-}catch(e){}
+  try{
+    saved = JSON.parse(
+      localStorage.getItem('nexus_customer_orders')||'[]'
+    );
+  }catch(e){}
 
-if(saved[0]&&$('orderStatus').style.display==='block'){
-checkCustomerOrder(saved[0].token);
-}
+  if(saved[0]&&$('orderStatus').style.display==='block'){
+    checkCustomerOrder(saved[0].token);
+  }
 
 },10000);
 
